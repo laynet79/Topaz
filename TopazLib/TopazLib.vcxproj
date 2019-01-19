@@ -84,6 +84,7 @@
   <ItemGroup>
     <ClCompile Include="Class.cpp" />
     <ClCompile Include="Collection.cpp" />
+    <ClCompile Include="Command.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Method.cpp" />

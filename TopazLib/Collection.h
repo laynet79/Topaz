@@ -31,7 +31,7 @@ class  String : public Object
 {
 public:
 	String(const string& value) { mString = value; }
-	string& operator * (){ return mString; }
+	string& value() { return mString; }
 	String* operator + (const String& b) { return new String(mString + b.mString); }
 	virtual void toString(ostream& out) const { out << "\"" << mString << "\""; }
 protected:

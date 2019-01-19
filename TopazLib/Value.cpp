@@ -2,6 +2,7 @@
 #include "Collection.h"
 
 #include <iomanip>
+#include <sstream>
 using namespace std;
 
 //-------------------------------------------------------
@@ -22,27 +23,34 @@ Value& Value::operator = (const Value& value)
 	return *this;
 }
 //-------------------------------------------------------
+string Value::toString()
+{
+	ostringstream s;
+	s << *this;
+	return s.str();
+}
+//-------------------------------------------------------
 ostream& operator << (ostream& out, const Value& v)
 {
-	switch (v.mType)
+	switch (v.type())
 	{
 	case Value::BOOL:
-		out << v.mBool ? "true" : "false";
+		out << v.boolean() ? "true" : "false";
 		break;
 	case Value::NUMBER:
-		if ((double)(long long)v.mNumber == v.mNumber)
-			out << (long long)v.mNumber;
+		if ((double)(long long)v.number() == v.number())
+			out << (long long)v.number();
 		else
-			out << fixed << setprecision(6) << v.mNumber;
+			out << fixed << setprecision(6) << v.number();
 		break;
 	case Value::INDEX:
-		out << "<Index:" << v.mIndex << ">";
+		out << "<Index:" << v.index() << ">";
 		break;
 	case Value::NIL:
 		out << "nil";
 		break;
 	default:
-		out << v.mObject;
+		out << v.object();
 		break;
 	}
 	return out;

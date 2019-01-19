@@ -46,15 +46,15 @@ public:
 	void popFrame()
 	{
 		mTos = mFrame;
-		mFrame = mStack[mFrame].mIndex;
+		mFrame = mStack[mFrame].index();
 	}
 	Instance* inst()
 	{
-		return (Instance*)mStack[mFrame + 2].mObject;
+		return (Instance*)mStack[mFrame + 2].object();
 	}
 	Value& param(int i)
 	{
-		return mStack[mFrame - mStack[mFrame+1].mIndex + i];
+		return mStack[mFrame - mStack[mFrame+1].index() + i];
 	}
 	Value& local(int i)
 	{

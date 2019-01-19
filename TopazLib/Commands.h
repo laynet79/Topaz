@@ -15,21 +15,21 @@ public:
 	string name() const override { return "ADD"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != s2.mType)
+		Value& s1 = value(vm, 0);
+		Value& s2 = value(vm, 1);
+		Value& d = value(vm, 2);
+		if (s2.type() != Value::STRING && s1.type() != s2.type())
 			error("incompatible types");
-		switch (s1.mType)
+		switch (s1.type())
 		{
 		case Value::NUMBER:
-			d = s1.mNumber + s2.mNumber;
+			d = s1.number() + s2.number();
 			break;
 		case Value::STRING:
-			d = *s1.mString + *s2.mString;
+			d = new String(s1.str()->value() + s2.toString());
 			break;
 		case Value::LIST:
-			d = *s1.mList + *s2.mList;
+			d = *s1.list() + *s2.list();
 			break;
 		default:
 			error("incompatible types");
@@ -48,12 +48,10 @@ public:
 	string name() const override { return "SUB"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != s2.mType || s1.mType != Value::NUMBER)
-			error("number expected");
-		d = s1.mNumber - s2.mNumber;
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		d = s1.number() - s2.number();
 		pc += 1;
 		return true;
 	}
@@ -68,12 +66,10 @@ public:
 	string name() const override { return "MUL"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != s2.mType || s1.mType != Value::NUMBER)
-			error("number expected");
-		d = s1.mNumber * s2.mNumber;
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		d = s1.number() * s2.number();
 		pc += 1;
 		return true;
 	}
@@ -88,14 +84,12 @@ public:
 	string name()const  override { return "DIV"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != s2.mType || s1.mType != Value::NUMBER)
-			error("number expected");
-		if (s2.mNumber == 0.0)
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		if (s2.number() == 0.0)
 			error("divide by zero");
-		d = s1.mNumber / s2.mNumber;
+		d = s1.number() / s2.number();
 		pc += 1;
 		return true;
 	}
@@ -110,14 +104,12 @@ public:
 	string name() const override { return "MOD"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != s2.mType || s1.mType != Value::NUMBER)
-			error("number expected");
-		if (s2.mNumber == 0.0)
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		if (s2.number() == 0.0)
 			error("divide by zero");
-		d = fmod(s1.mNumber, s2.mNumber);
+		d = fmod(s1.number(), s2.number());
 		pc += 1;
 		return true;
 	}
@@ -132,11 +124,9 @@ public:
 	string name() const override { return "INT"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			error("number expected");
-		d = floor(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = floor(s.number());
 		pc += 1;
 		return true;
 	}
@@ -151,11 +141,9 @@ public:
 	string name() const override { return "FRC"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			error("number expected");
-		d = s.mNumber - floor(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = s.number() - floor(s.number());
 		pc += 1;
 		return true;
 	}
@@ -170,11 +158,9 @@ public:
 	string name() const override { return "SQT"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			throw "number expected";
-		d = sqrt(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = sqrt(s.number());
 		pc += 1;
 		return true;
 	}
@@ -189,12 +175,10 @@ public:
 	string name() const override { return "POW"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("number expected");
-		d = pow(s1.mNumber, s2.mNumber);
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		d = pow(s1.number(), s2.number());
 		pc += 1;
 		return true;
 	}
@@ -209,11 +193,9 @@ public:
 	string name() const override { return "SIN"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			error("number expected");
-		d = sin(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = sin(s.number());
 		pc += 1;
 		return true;
 	}
@@ -228,11 +210,9 @@ public:
 	string name() const override { return "COS"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			error("number expected");
-		d = cos(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = cos(s.number());
 		pc += 1;
 		return true;
 	}
@@ -247,11 +227,9 @@ public:
 	string name() const override { return "TAN"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			error("number expected");
-		d = tan(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = tan(s.number());
 		pc += 1;
 		return true;
 	}
@@ -266,11 +244,9 @@ public:
 	string name() const override { return "ASN"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			error("number expected");
-		d = asin(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = asin(s.number());
 		pc += 1;
 		return true;
 	}
@@ -285,11 +261,9 @@ public:
 	string name() const override { return "ACS"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			error("number expected");
-		d = acos(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = acos(s.number());
 		pc += 1;
 		return true;
 	}
@@ -304,11 +278,9 @@ public:
 	string name() const override { return "ATN"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::NUMBER)
-			error("number expected");
-		d = atan(s.mNumber);
+		Value& s = value(vm, 0, Value::NUMBER);
+		Value& d = value(vm, 1);
+		d = atan(s.number());
 		pc += 1;
 		return true;
 	}
@@ -323,12 +295,10 @@ public:
 	string name() const override { return "AT2"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("numbers expected");
-		d = atan2(s1.mNumber, s2.mNumber);
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		d = atan2(s1.number(), s2.number());
 		pc += 1;
 		return true;
 	}
@@ -343,7 +313,7 @@ public:
 	string name() const override { return "PSH"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		vm.stack().push(mArg[0]->value(vm));
+		vm.stack().push(value(vm, 0));
 		return true;
 	}
 };
@@ -357,7 +327,7 @@ public:
 	string name() const override { return "PSH"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		mArg[0]->value(vm) = vm.stack().pop();
+		value(vm, 0) = vm.stack().pop();
 		return true;
 	}
 };
@@ -371,7 +341,7 @@ public:
 	string name() const override { return "CAL"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Instance* inst = (Instance*)mArg[0]->value(vm).mObject;
+		Instance* inst = (Instance*)value(vm, 0).object();
 		Method* m = (Method*)mArg[1];
 		vm.stack().newFrame(inst, m->paramCnt(), m->localCnt());
 		m->run(vm);
@@ -392,7 +362,7 @@ public:
 	string name() const override { return "RTN"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& v = mArg[0]->value(vm);
+		Value& v = value(vm, 0);
 		vm.stack().popFrame();
 		vm.stack().push(v);
 		pc += 1;
@@ -409,7 +379,7 @@ public:
 	string name() const override { return "JMP"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		pc = mArg[0]->value(vm).mIndex;
+		pc = value(vm, 0).index();
 		return true;
 	}
 };
@@ -423,14 +393,12 @@ public:
 	string name() const override { return "BRF"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& a = mArg[1]->value(vm);
-		if (s.mType != Value::BOOL)
-			error("boolean expected");
-		if (s.mBool)
+		Value& s = value(vm, 0, Value::BOOL);
+		Value& a = value(vm, 1, Value::BOOL);
+		if (s.boolean())
 			pc += 1;
 		else
-			pc = a.mIndex;
+			pc = a.index();
 		return true;
 	}
 };
@@ -444,12 +412,10 @@ public:
 	string name() const override { return "LT "; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("number expected");
-		d = s1.mNumber < s2.mNumber;
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		d = s1.number() < s2.number();
 		pc += 1;
 		return true;
 	}
@@ -464,12 +430,10 @@ public:
 	string name() const override { return "LTE"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("number expected");
-		d = s1.mNumber <= s2.mNumber;
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		d = s1.number() <= s2.number();
 		pc += 1;
 		return true;
 	}
@@ -484,12 +448,10 @@ public:
 	string name() const override { return "GT "; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("number expected");
-		d = s1.mNumber > s2.mNumber;
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		d = s1.number() > s2.number();
 		pc += 1;
 		return true;
 	}
@@ -504,12 +466,10 @@ public:
 	string name() const override { return "GTE"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("number expected");
-		d = s1.mNumber >= s2.mNumber;
+		Value& s1 = value(vm, 0, Value::NUMBER);
+		Value& s2 = value(vm, 1, Value::NUMBER);
+		Value& d = value(vm, 2);
+		d = s1.number() >= s2.number();
 		pc += 1;
 		return true;
 	}
@@ -524,12 +484,32 @@ public:
 	string name() const override { return "EQ "; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("number expected");
-		d = s1.mNumber == s2.mNumber;
+		Value& s1 = value(vm, 0);
+		Value& s2 = value(vm, 1);
+		Value& d = value(vm, 2);
+		bool result;
+		if (s1.type() != s2.type())
+			result = false;
+		else
+		{
+			bool result = false;
+			switch (s1.type())
+			{
+			case Value::BOOL:
+				result = s1.boolean() == s2.boolean();
+				break;
+			case Value::NUMBER:
+				result = s1.number() == s2.number();
+				break;
+			case Value::STRING:
+				result = s1.str()->value() == s2.str()->value();
+				break;
+			default:
+				result = false;
+				break;
+			}
+		}
+		d = result;
 		pc += 1;
 		return true;
 	}
@@ -544,12 +524,10 @@ public:
 	string name() const override { return "AND"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("boolean expected");
-		d = s1.mNumber && s2.mNumber;
+		Value& s1 = value(vm, 0, Value::BOOL);
+		Value& s2 = value(vm, 1, Value::BOOL);
+		Value& d = value(vm, 2);
+		d = s1.number() && s2.number();
 		pc += 1;
 		return true;
 	}
@@ -564,12 +542,10 @@ public:
 	string name() const override { return "OR "; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s1 = mArg[0]->value(vm);
-		Value& s2 = mArg[1]->value(vm);
-		Value& d = mArg[2]->value(vm);
-		if (s1.mType != Value::NUMBER || s2.mType != Value::NUMBER)
-			error("boolean expected");
-		d = s1.mNumber || s2.mNumber;
+		Value& s1 = value(vm, 0, Value::BOOL);
+		Value& s2 = value(vm, 1, Value::BOOL);
+		Value& d = value(vm, 2);
+		d = s1.number() || s2.number();
 		pc += 1;
 		return true;
 	}
@@ -584,11 +560,9 @@ public:
 	string name() const override { return "NOT"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Value& s = mArg[0]->value(vm);
-		Value& d = mArg[1]->value(vm);
-		if (s.mType != Value::BOOL)
-			error("boolean expected");
-		d = !s.mBool;
+		Value& s = value(vm, 0, Value::BOOL);
+		Value& d = value(vm, 1);
+		d = !s.boolean();
 		pc += 1;
 		return true;
 	}

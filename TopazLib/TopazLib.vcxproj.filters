@@ -14,6 +14,7 @@
     <ClCompile Include="TopazImp.cpp" />
     <ClCompile Include="Value.cpp" />
     <ClCompile Include="VirtualMachine.cpp" />
+    <ClCompile Include="Command.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallBack.h" />
