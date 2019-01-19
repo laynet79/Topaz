@@ -1,0 +1,141 @@
+//--------------------------------------------------
+// This file contains the language definition for
+// the "Topaz" programing language.  Rules are specified
+// using <rule-name> ::= <rule-definition> ;
+// rules have the following grammer.
+//  { }		zero or more
+//  [ ]		optional
+//  |		or
+//  "a"		quoted items are literals (terminals)
+//  ;		end of rule
+//--------------------------------------------------
+program ::=
+	{ class } ;
+
+class ::=
+	"class" ID "{" {member-dec} "}" ;
+
+member-dec ::=
+	class | constructor | var-dec | method-dec ;
+
+constructor ::=
+	method-dec ;
+
+var-dec ::=
+	  ID ["=" assignment-expression] ";"
+	| id-tuple ["=" expression-tuple] ";" ;
+
+method-dec ::=
+	ID "(" [param-list] ")" method-body ;
+
+param-list ::=
+	ID { "," ID } ;
+
+method-body ::=
+	"{" { statment }  "}" ;
+
+statement ::=
+	  "{" {statement} "}"
+	| var-dec
+	| expression ";"
+	| "break" ";"
+	| "if" "(" expression ")" statement ["else" statement]
+	| "for" "(" ID "in" expression [for-range] ")" statement
+	| "while" "(" expression ")" statement
+	| "do" statement "while" "(" expression ")"
+	;
+
+for-range ::=
+	".." expression
+	| ..< expression
+	;
+
+expression ::=
+	  "(" expression ")" [expressionz]
+	| "!" expression
+	| "-" expression
+	| "true" [expressionz]
+	| "false" [expressionz]
+	| "null" [expressionz]
+	| "pi" [expressionz]
+	| NUMBER [expressionz]
+	| STRING [expressionz]
+	| tuple
+	| list [expressionz]
+	| builtin "(" [arg-list] ")" [expressionz]
+	| ID [fn-arr-member] [ member-refz ] [expressionz]
+	;
+
+fn-array-member ::=
+	  "(" [arg-list] ")"
+	| "[" expression "]"
+	;
+
+arg-list ::=
+	expression { "," expression } ;
+
+member-refz ::=
+	"." ID [fn-arr-member] [fn-arr-member] ;
+
+expressionz ::=
+	  assignment-expression
+	| "&&" expression
+	| "||" expression
+	| "==" expression
+	| "!=" expression
+	| "<=" expression
+	| ">=" expression
+	| "<"  expression
+	| ">"  expression
+	| "+"  expression
+	| "-"  expression
+	| "*"  expression
+	| "/"  expression
+	| "%"  expression
+	;
+
+assignment-expression ::=
+	  "=" expression
+	| "+=" expression
+	| "-=" expression
+	| "*=" expression
+	| "/=" expression
+	| ID new-dec
+	;
+
+new-dec ::=
+	  "(" [arg-list] ")"
+	| "[" expression "]"
+	;
+
+list ::=
+	  "[ [exp-list] "]" ;
+
+exp-list ::=
+	expression { "," expression } ;
+
+tuple ::=
+	"(" expression {"," expression} ")"
+	| expression {"," expression}
+	;
+
+id-tuple ::=
+	"(" ID {"," ID} ")"
+	| ID {"," ID}
+	;
+
+expression-tuple ::=
+	"(" [exp-list] ")"
+	| expression {"," expression} ;
+
+built-in ::=
+	"int" | "frac" | "floor" | "ceil" | "sqrt" | "pow" |
+	"sin" | "cos" | "tan" | "asin" | "acos" | "atan" | "atan2" ;
+
+ID ::= [_a..zA..z][_a..zA..Z0..9]*		// Ids that start with "_" are private,
+										// starts with Capital indicates static (class)
+
+NUMBER ::= -?[0..9]+(\.[0..9]+)?
+
+STRING ::= \".*\""
+

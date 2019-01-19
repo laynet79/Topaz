@@ -33,4 +33,7 @@
     <ClInclude Include="Value.h" />
     <ClInclude Include="VirtualMachine.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Grammer.txt" />
+  </ItemGroup>
 </Project>

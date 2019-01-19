@@ -114,6 +114,9 @@
     <ClInclude Include="Value.h" />
     <ClInclude Include="VirtualMachine.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Grammer.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
