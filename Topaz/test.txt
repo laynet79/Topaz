@@ -1,0 +1,31 @@
+//------------------------------------------------
+// This is a Topaz test program
+//------------------------------------------------
+class Person
+{
+	_name, _age; // private instance members
+	_Cnt = 0;    // private class member
+
+	Person(name, age) // constructor
+	{
+		this.name = name;
+		this.age = age;
+		_Cnt += 1; // keep track of how many people exist
+	}
+	info() { return (name, age); } // public instance method
+	Cnt() { return _cnt; }         // public class method
+
+	Main() // entry point of program
+	{
+		weight = 23.3;
+		people = [];
+		people += Person("Layne", 58);
+		people += Person("Carolyn", 56);
+		people += Person("Becca", 26);
+		for (p in people)
+		{
+			name,age = p.info();
+			writeln(name, age);
+		}
+	}
+}
