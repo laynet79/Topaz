@@ -83,8 +83,8 @@ public:
 	{
 		static const char* kindNames[] = { "class", "method", "static", "instance", "param", "local", "temp", "constant" };
 		static const char* accessNames[] = { "public", "protected" };
-		out << " id=" << id << " kind=" << kindNames[kind]
-			<< " address=" << address << " access=" << accessNames[access] << endl;
+		out << " id=" << id << " kind=" << kindNames[kind] << " address=" << address 
+			<< " access=" << accessNames[access] << endl;
 	}
 };
 //-------------------------------------------------------

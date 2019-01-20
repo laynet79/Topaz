@@ -11,9 +11,9 @@ Value& Command::value(VirtualMachine& vm, int arg, Value::Type type)
 //-------------------------------------------------------
 ostream& operator << (ostream& out, const Command& c)
 {
-	out << c.name();
+	out << c.name() << " ";
 	for (int i = 0; i < 3; i++)
 		if (c.arg(i))
-			out << " " << c.arg(i)->id << " ";
+			out << " " << c.arg(i)->id;
 }
 //-------------------------------------------------------

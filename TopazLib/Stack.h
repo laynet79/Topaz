@@ -4,13 +4,50 @@
 
 //-------------------------------------------------------
 // This class implements the run-time stack of the Topaz
-// virtual machine
+// virtual machine.  A typical stack frame is shown below,
+// growing down (stack addresses increase downward). Notice
+// that parameters are pushed on the stack in the order they
+// appear in the function call to simply the compiler. This
+// required a parameter count be added to the stack so that
+// parameters can be indexed correctly relative to the
+// frame pointer.
+//
+//	|					|
+//	+-------------------+
+//	|		param 0		|
+//	+-------------------+
+//	|		...			|
+//	+-------------------+
+//	|		param n		|
+//	+-------------------+
+//	|	previous FP		|	<--- FP (frame pointer)
+//	+-------------------+
+//	|	param Cnt		|
+//	+-------------------+
+//	|	this pointer	|
+//	+-------------------+
+//	|		local 0		|
+//	+-------------------+
+//	|		...			|
+//	+-------------------+
+//	|		local n		|
+//	+-------------------+
+//	|					|	<--- TOS (top of stack)
+//
 //-------------------------------------------------------
 class Stack
 {
 public:
 	Stack()
 	{
+		mTos = mFrame = 0;
+	}
+
+	void reset()
+	{
+		// release all stack owned reference values
+		for (int i = 0; i < STACK_SIZE; i++)
+			mStack[i] = Value();
 		mTos = mFrame = 0;
 	}
 
@@ -28,11 +65,14 @@ public:
 	}
 	void pop(int cnt)
 	{
-		mTos -= cnt;
+		for (int i = 0; i < cnt; i++)
+			mStack[--mTos] = Value(); // free any reference values
 	}
 	Value pop()
 	{
-		return mStack[--mTos];
+		Value v = mStack[--mTos];
+		mStack[mTos] = Value(); // free any reference values
+		return v;
 	}
 	void newFrame(Instance* inst, int paramCnt, int localCnt)
 	{

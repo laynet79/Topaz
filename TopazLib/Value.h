@@ -12,7 +12,17 @@ class List;
 #pragma warning(disable: 26495)
 
 //-------------------------------------------------------
-// this class represents a data Value
+// this class represents a data Value in Topaz.  A union
+// is used so that a value can represent any data type
+// used in the language. Simple types like numbers and
+// booleans are stored directly in the Value object, and
+// complex types are store using a pointer (reference type).
+// All reference types maintain a reference count so that
+// when they are no longer referenced, they can be automatically
+// deleted.  The Value class overloads the assignment operator
+// so that when a values type is changed to or from a 
+// reference type, that it assists in maintaining that
+// reference count.
 //-------------------------------------------------------
 class __declspec(dllexport) Value
 {
