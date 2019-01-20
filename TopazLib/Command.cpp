@@ -15,5 +15,6 @@ ostream& operator << (ostream& out, const Command& c)
 	for (int i = 0; i < 3; i++)
 		if (c.arg(i))
 			out << " " << c.arg(i)->id;
+	return out;
 }
 //-------------------------------------------------------
