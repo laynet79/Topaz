@@ -122,10 +122,6 @@ void Tokenizer::nextToken()
 	{
 		mNext = new Token(Token::ID, mLineNum, mLexeme);
 	}
-	else if (parsePunctuation())
-	{
-		mNext = new Token(Token::PUNC, mLineNum, mLexeme);
-	}
 	else if (parseSymbol())
 	{
 		mNext = new Token(Token::SYMBOL, mLineNum, mLexeme);
@@ -177,33 +173,15 @@ bool Tokenizer::parseID()
 	return startsWith(re);
 }
 //-------------------------------------------------------
-// attempt to parse a punctuation symbol from the front of
-// the input line
-//-------------------------------------------------------
-bool Tokenizer::parsePunctuation()
-{
-	static regex cases[] = { regex("^\\,"), regex("^\\;"), regex("^\\:"), regex("^\\.") };
-	for (regex& re: cases)
-	{
-		if (startsWith(re))
-			return true;
-	}
-	return false;
-}
-//-------------------------------------------------------
 // attempt to parse a keyword from the front of the input line
 //-------------------------------------------------------
 bool Tokenizer::parseKeyword()
 {
 	static regex keywords[]
 	{
-		regex("^break"), regex("^case"),
-			regex("^class"), regex("^else"),
-			regex("^false"), regex("^for"), regex("^frac"), regex("^if"), regex("^int"), regex("^in"),
-			regex("^null"),
-			regex("^return"),
-			regex("^switch"), regex("^this"), regex("^true"),
-			regex("^while")
+		regex("^case"), regex("^class"), regex("^else"), regex("^false"), regex("^for"), 
+		regex("^if"), regex("^in\s"), regex("^switch"), regex("^true"), 
+		regex("^do"), regex("^this"), regex("^null"), regex("^while")
 	};
 	for (regex& re : keywords)
 	{
@@ -219,11 +197,12 @@ bool Tokenizer::parseSymbol()
 {
 	static regex symbols[]
 	{
-		regex("^\\+"), regex("^\\-"), regex("^\\*"), regex("^/"), // math
-		regex("^<="), regex("^>="), regex("^<"), regex("^>"), regex("^=="), regex("^!="), // relational
+		regex("^\\+{2}"), regex("^\\-{2}"), regex("^\\+="), regex("^\\-="), regex("^\\*="), regex("^/="), regex("^\\+"), regex("^\\-"), regex("^\\*"), regex("^/"), regex("^%"), // math
+		regex("^<="), regex("^>="), regex("^<"), regex("^>"), regex("^=="), regex("^!="), regex("^!"), // relational
 		regex("^&&"), regex("^\\|\\|"), // boolean
 		regex("^="), // assignment
 		regex("^\\{"), regex("^\\}"), regex("^\\("), regex("^\\)"), regex("^\\["), regex("^\\]"), 
+		regex("^\\.{2}<"), regex("^\\.{2}"), regex("^\\,"), regex("^\\;"), regex("^\\:"), regex("^\\."), regex("^\\?"), // punctuation
 	};
 	for (regex& re : symbols)
 	{
