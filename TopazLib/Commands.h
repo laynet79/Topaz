@@ -342,7 +342,10 @@ public:
 	bool run(VirtualMachine& vm, int& pc) override
 	{
 		Instance* inst = (Instance*)value(vm, 0).object();
-		Method* m = (Method*)mArg[1];
+		Symbol* selector = mArg[1];
+		Method* m = inst->type()->lookupMethod(selector);
+		if (m == nullptr)
+			error(string("undefined method: ") + selector->name + string(" class: ") + inst->type()->name);
 		vm.stack().newFrame(inst, m->paramCnt(), m->localCnt());
 		m->run(vm);
 		Value result = vm.stack().pop();

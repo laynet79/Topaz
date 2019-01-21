@@ -31,43 +31,41 @@ SymbolTable::SymbolTable(vector<Constant*> constants, vector<Class*>& classes)
 //-------------------------------------------------------
 Symbol* SymbolTable::create(const string& name, Kind kind, Access access, bool isStatic)
 {
-	Symbol* s;
 	switch (kind)
 	{
 	case NUMBER:
 	{
 		Value value = atof(name.c_str());
-		s = new Constant(name, value);
+		Constant* s = new Constant(name, value);
 		s->address = (int)mConstants.size();
-		mConstants.push_back((Constant*)s);
-		break;
+		mConstants.push_back(s);
+		return s;
 	}
 	case BOOL:
 	{
 		Value value = (name == "true") ? true : false;
-		s = new Constant(name, value);
+		Constant* s = new Constant(name, value);
 		s->address = (int)mConstants.size();
-		mConstants.push_back((Constant*)s);
-		break;
+		mConstants.push_back(s);
+		return s;
 	}
 	case STRING:
 	{
 		Value value = new String(name);
-		s = new Constant(name, value);
+		Constant* s = new Constant(name, value);
 		s->address = (int)mConstants.size();
-		mConstants.push_back((Constant*)s);
-		break;
+		mConstants.push_back(s);
+		return s;
 	}
 	case CLASS:
 	{
-		s = new Class(this, name);
+		Class* s = new Class(this, name);
 		s->address = (int)mClasses.size();
-		mClasses.push_back((Class*)s);
-		break;
+		mClasses.push_back(s);
+		return s;
 	}
 	default:
-		s = nullptr;
+		return nullptr;
 	}
-	return s;
 }
 //-------------------------------------------------------

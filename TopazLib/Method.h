@@ -14,8 +14,7 @@ class MethodHandler;
 class Method : public Symbol
 {
 public:
-	Method(Symbol* c, const string& name, Access access, MethodHandler* handler)
-		: Symbol((Symbol*)c, name, METHOD, nextId(), access), mLocalCnt(0), mHandler(handler) {}
+	Method(Symbol* c, const string& name, Access access, MethodHandler* handler);
 
 	static string nextId(bool reset = false)
 	{
@@ -29,12 +28,14 @@ public:
 
 	void link();
 
+	Symbol* selector() { return mSelector; }
 	int paramCnt() { return (int)mParams.size(); }
 	int localCnt() { return mLocalCnt; }
 
 	void run(VirtualMachine& vm);
 
 protected:
+	Symbol*            mSelector;
 	vector<Parameter*> mParams;
 	vector<Local*>     mLocals;
 	vector<Temporary*> mTemps;

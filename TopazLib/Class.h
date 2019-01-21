@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 using namespace std;
 #include "Symbol.h"
 
@@ -41,14 +42,11 @@ public:
 
 	Instance* createInstance();
 
-
-
-	void addMethod(Method* method, bool isStatic, bool isMain = false);
-	void addVariable(Variable* v, bool isStatic);
+	Method* lookupMethod(Symbol* selector) { return mMethods.at(selector); }
 
 private:
 	vector<Method*>		 mClassMethods;
-	vector<Method*>		 mMethods;
+	map<Symbol*, Method*>mMethods;
 	vector<ClassVar*>	 mClassVars;
 	vector<InstanceVar*> mInstanceVars;
 	Method*				 mMain;

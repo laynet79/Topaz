@@ -2,6 +2,14 @@
 #include "MethodHandler.h"
 
 //-------------------------------------------------------
+Method::Method(Symbol* c, const string& name, Access access, MethodHandler* handler)
+	: Symbol((Symbol*)c, name, METHOD, nextId(), access), mLocalCnt(0), mHandler(handler)
+{
+	// create a global string constant using the method name that will
+	// be used a key to lookup methods of this name
+	mSelector = this->add(name, GLOBAL);
+}
+//-------------------------------------------------------
 Symbol* Method::create(const string& name, Kind kind, Access access, bool isStatic)
 {
 	switch (kind)
@@ -29,7 +37,6 @@ Symbol* Method::create(const string& name, Kind kind, Access access, bool isStat
 		}
 	default:
 		return nullptr;
-		break;
 	}
 }
 //-------------------------------------------------------
