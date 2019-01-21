@@ -20,12 +20,25 @@ class Person
 		weight = 23.3;
 		people = [];
 		people += Person("Layne", 58);
-		people += Person("Carolyn", 56);
-		people += Person("Becca", 26);
+		people *= Person("Carolyn", 56);
+		people -= Person("Becca", 26);
+		people /= Person("Becca", 26);
 		for (p in people)
 		{
 			name,age = p.info();
 			writeln(name, age);
+			weight++;
+			weight--;
+		}
+
+		if(!true && false || people == null || weight >= 6)
+			weight = 10 % 3;
+
+		while (age != 50)
+		{
+			name = (weight < 100 ? "Unkown" : name); 
 		}
 	}
+
+	testVal = 6.0..<8.3;
 }

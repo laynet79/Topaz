@@ -10,9 +10,8 @@ using namespace std;
 class Token
 {
 public:
-	enum Type { NUMBER, STRING, ID, PUNC, KEYWORD, SYMBOL, ENDOF, UNKNOWN };
+	enum Type { NUMBER, STRING, ID, KEYWORD, SYMBOL, ENDOF, UNKNOWN };
 	enum Group { GENERAL, MATHOP, RELOP, BOOLOP, ASSIGN, LP, RP, LB, RB, LS, RS };
-	enum PuncType { PERIOD, COMMA, SEMI, COLON };
 
 	Token(Type type, int line, string lexeme="", Group group = GENERAL, int value = 0)
 	{
@@ -42,7 +41,7 @@ private:
 inline
 ostream& operator << (ostream& out, const Token& t)
 {
-	const char* typeNames[] = { "NUMBER", "STRING", "ID", "PUNCTUATION", "KEYWORD", "SYMBOL", "EOF", "UNKNOWN" };
+	const char* typeNames[] = { "NUMBER", "STRING", "ID", "KEYWORD", "SYMBOL", "EOF", "UNKNOWN" };
 	out << setw(10) << left << t.lexeme() << setw(15) << left << typeNames[t.type()] << t.line();
 	return out;
 }
