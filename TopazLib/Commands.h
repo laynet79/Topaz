@@ -490,12 +490,9 @@ public:
 		Value& s1 = value(vm, 0);
 		Value& s2 = value(vm, 1);
 		Value& d = value(vm, 2);
-		bool result;
-		if (s1.type() != s2.type())
-			result = false;
-		else
+		bool result = false;
+		if (s1.type() == s2.type())
 		{
-			bool result = false;
 			switch (s1.type())
 			{
 			case Value::BOOL:

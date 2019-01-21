@@ -19,21 +19,15 @@ class Class : public Symbol
 public:
 	Class(Symbol* parent, const string& name) : Symbol(parent, name, CLASS, nextId(), PUBLIC), mMain(nullptr) {}
 
-	Symbol* create(const string& name, Kind kind, Access access = PROTECTED, bool isStatic = false) override;
+	Symbol* create(const string& name, Kind kind) override;
 
 	void reset()
 	{
-		for (ClassVar* v : mClassVars)
+		for (Variable* v : mClassVars)
 			v->value() = Value(0);
 	}
 
-	static string nextId(bool reset = false)
-	{
-		static int nextId = 100;
-		string s = "C" + to_string(nextId++);
-		if (reset) nextId = 100;
-		return s;
-	}
+	static void resetId() { sNextId = 100; }
 
 	int size() { return (int)mInstanceVars.size(); }
 	Value& classVar(int i) { return mClassVars[i]->value(); }
@@ -47,7 +41,14 @@ public:
 private:
 	vector<Method*>		 mClassMethods;
 	map<Symbol*, Method*>mMethods;
-	vector<ClassVar*>	 mClassVars;
-	vector<InstanceVar*> mInstanceVars;
+	vector<Variable*>	 mClassVars;
+	vector<Variable*>    mInstanceVars;
 	Method*				 mMain;
+
+	static int sNextId;
+	static string nextId()
+	{
+		string s = "C" + to_string(sNextId++);
+		return s;
+	}
 };

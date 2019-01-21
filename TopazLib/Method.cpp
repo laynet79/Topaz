@@ -2,6 +2,8 @@
 #include "MethodHandler.h"
 
 //-------------------------------------------------------
+int Method::sNextId = 100;
+//-------------------------------------------------------
 Method::Method(Symbol* c, const string& name, Access access, MethodHandler* handler)
 	: Symbol((Symbol*)c, name, METHOD, nextId(), access), mLocalCnt(0), mHandler(handler)
 {
@@ -10,39 +12,35 @@ Method::Method(Symbol* c, const string& name, Access access, MethodHandler* hand
 	mSelector = this->add(name, GLOBAL);
 }
 //-------------------------------------------------------
-Symbol* Method::create(const string& name, Kind kind, Access access, bool isStatic)
+Symbol* Method::create(const string& name, Kind kind)
 {
-	switch (kind)
+	Variable* v = new Variable(this, name, kind);
+	switch (v->kind)
 	{
 	case PARAM:
 		{
-			Parameter* s = new Parameter(this, name);
-			s->address = (int)mParams.size();
-			mParams.push_back(s);
-			return s;
+			v->address = (int)mParams.size();
+			mParams.push_back(v);
 		}
 	case LOCAL:
 		{
-			Local* s = new Local(this, name);
-			s->address = (int)mLocals.size();
-			mLocals.push_back(s);
-			return s;
+			v->address = (int)mLocals.size();
+			mLocals.push_back(v);
 		}
 	case TEMP:
 		{
-			Temporary* s = new Temporary(this, name);
-			s->address = (int)mTemps.size();
-			mTemps.push_back(s);
-			return s;
+			v->address = (int)mTemps.size();
+			mTemps.push_back(v);
 		}
 	default:
 		return nullptr;
 	}
+	return v;
 }
 //-------------------------------------------------------
 void Method::link()
 {
-	for (Temporary* t : mTemps)
+	for (Variable* t : mTemps)
 		t->address += (int)mLocals.size();
 	mLocalCnt = (int)(mLocals.size() + mTemps.size());
 }

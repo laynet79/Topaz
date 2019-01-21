@@ -15,10 +15,10 @@ class VirtualMachine;
 class Symbol
 {
 public:
-	enum Kind { GLOBAL, CLASS, METHOD, STATIC, INSTANCE, PARAM, LOCAL, TEMP, CONSTANT, NUMBER, BOOL, STRING };
+	enum Kind { GLOBAL, CLASS, METHOD, MEMBER, STATIC, INSTANCE, PARAM, LOCAL, TEMP, CONSTANT, NUMBER, BOOL, STRING };
 	enum Access { PUBLIC, PROTECTED };
 
-	Symbol(Symbol* parent, const string& name, Kind kind, const string& id, Access access=PROTECTED, bool isStatic=false)
+	Symbol(Symbol* parent, const string& name, Kind kind, const string& id, Access access)
 	{
 		this->parent = parent;
 		this->name = name;
@@ -26,7 +26,6 @@ public:
 		this->id = id;
 		this->access = access;
 		this->address = 0;
-		this->isStatic = isStatic;
 	}
 	virtual ~Symbol()
 	{
@@ -34,10 +33,10 @@ public:
 			delete p.second;
 	}
 
-	Symbol* add(const string& name, Kind kind, Access access = PROTECTED, bool isStatic = false)
+	Symbol* add(const string& name, Kind kind)
 	{
 		if (kind > CONSTANT && parent != nullptr)
-			return parent->add(name, kind, access, isStatic);
+			return parent->add(name, kind);
 
 		Symbol* s = nullptr;
 		try
@@ -48,12 +47,12 @@ public:
 			throw "redefinition: " + name;
 		}
 		catch (...) {}
-		s = create(name, kind, access, isStatic);
+		s = create(name, kind);
 		mMap[name] = s;
 		return s;
 	}
 
-	virtual Symbol* create(const string& name, Kind kind, Access access = PROTECTED, bool isStatic = false) { return nullptr; }
+	virtual Symbol* create(const string& name, Kind kind) { return nullptr; }
 
 	Symbol* lookup(const string& name, bool recursive = true)
 	{
@@ -77,7 +76,6 @@ public:
 	Kind   kind;
 	Access access;
 	int    address;
-	bool   isStatic;
 
 	void toString(ostream& out)
 	{
@@ -96,15 +94,17 @@ public:
 	Constant(const string& name, const Value& value)
 		: Symbol(nullptr, name, CONSTANT, nextId(), PUBLIC), mValue(value) {}
 	Value& value() { return mValue; }
-	static string nextId(bool reset = false)
-	{
-		static int nextId = 100;
-		string s = "K" + to_string(nextId++);
-		if (reset) nextId = 100;
-		return s;
-	}
+
+	static void resetId() { sNextId = 100; }
 protected:
 	Value  mValue;
+
+	static int sNextId;
+	static string nextId()
+	{
+		string s = "K" + to_string(sNextId++);
+		return s;
+	}
 };
 //-------------------------------------------------------
 // this class represents a variable
@@ -112,89 +112,51 @@ protected:
 class Variable : public Symbol
 {
 public:
-	Variable(Symbol* parent, const string& name, Kind kind, const string& id, Access access=PROTECTED)
-		: Symbol(parent, name, kind, id, access) {}
-};
-//-------------------------------------------------------
-// this class represents a static variable
-//-------------------------------------------------------
-class ClassVar : public Variable
-{
-public:
-	ClassVar(Symbol* parent, const string& name, Access access)
-		: Variable(parent, name, STATIC, nextId(), access) {}
+	Variable(Symbol* parent, const string& name, Kind kind)
+		: Symbol(parent, name, getKind(name, kind), nextId(name, kind), name[0] == '_' ? PROTECTED : PUBLIC) {}
 	Value& value() { return mValue; }
-	static string nextId(bool reset = false)
-	{
-		static int nextId = 100;
-		string s = "S" + to_string(nextId++);
-		if (reset) nextId = 100;
-		return s;
-	}
+
+	static void resetId() { sNextClassId = sNextInstId = sNextParamId = sNextLocalId = sNextTempId = 100; }
 protected:
+	static Kind getKind(const string& name, Kind kind)
+	{
+		if (kind == MEMBER)
+			return (isupper(name[0]) || (name[0] == '_' && name.size() > 1 && isupper(name[1]))) ? STATIC : INSTANCE;
+		return kind;
+	}
+
 	Value  mValue;
-};
-//-------------------------------------------------------
-// this class represents an instance variable
-//-------------------------------------------------------
-class InstanceVar : public Variable
-{
-public:
-	InstanceVar(Symbol* parent, const string& name, Access access)
-		: Variable(parent, name, INSTANCE, nextId(), access) {}
-	static string nextId(bool reset = false)
+
+	static int sNextClassId;
+	static int sNextInstId;
+	static int sNextParamId;
+	static int sNextLocalId;
+	static int sNextTempId;
+	static string nextId(const string& name, Kind kind)
 	{
-		static int nextId = 100;
-		string s = "I" + to_string(nextId++);
-		if (reset) nextId = 100;
-		return s;
-	}
-};
-//-------------------------------------------------------
-// this class represents a method parameter
-//-------------------------------------------------------
-class Parameter : public Variable
-{
-public:
-	Parameter(Symbol* parent, const string& name)
-		: Variable(parent, name, PARAM, nextId()) {}
-	static string nextId(bool reset = false)
-	{
-		static int nextId = 100;
-		string s = "P" + to_string(nextId++);
-		if (reset) nextId = 100;
-		return s;
-	}
-};
-//-------------------------------------------------------
-// this class represents a local variable
-//-------------------------------------------------------
-class Local : public Variable
-{
-public:
-	Local(Symbol* parent, const string& name)
-		: Variable(parent, name, LOCAL, nextId()) {}
-	static string nextId(bool reset = false)
-	{
-		static int nextId = 100;
-		string s = "L" + to_string(nextId++);
-		if (reset) nextId = 100;
-		return s;
-	}
-};
-//-------------------------------------------------------
-// this class represents a temporary variable
-//-------------------------------------------------------
-class Temporary : public Variable
-{
-public:
-	Temporary(Symbol* parent, const string& name)
-		: Variable(parent, name, TEMP, nextId()) {}
-	static string nextId(bool reset = false)
-	{
-		static int nextId = 100;
-		string s = "T" + to_string(nextId++);
-		if (reset) nextId = 100;
+		string s;
+		switch (kind)
+		{
+		case MEMBER:
+		{
+			if (getKind(name, kind) == STATIC)
+				s = "S" + to_string(sNextClassId++);
+			else
+				s = "I" + to_string(sNextInstId++);
+			break;
+		}
+		case PARAM:
+			s = "P" + to_string(sNextParamId++);
+			break;
+		case LOCAL:
+			s = "L" + to_string(sNextLocalId++);
+			break;
+		case TEMP:
+			s = "T" + to_string(sNextTempId++);
+			break;
+		default:
+			break;
+		}
 		return s;
 	}
 };

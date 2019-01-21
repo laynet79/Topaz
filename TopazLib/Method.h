@@ -16,15 +16,9 @@ class Method : public Symbol
 public:
 	Method(Symbol* c, const string& name, Access access, MethodHandler* handler);
 
-	static string nextId(bool reset = false)
-	{
-		static int nextId = 100;
-		string s = "F" + to_string(nextId++);
-		if (reset) { nextId = 100; }
-		return s;
-	}
+	static void resetId() { sNextId = 100; }
 
-	Symbol* create(const string& name, Kind kind, Access access = PROTECTED, bool isStatic = false) override;
+	Symbol* create(const string& name, Kind kind) override;
 
 	void link();
 
@@ -35,12 +29,19 @@ public:
 	void run(VirtualMachine& vm);
 
 protected:
-	Symbol*            mSelector;
-	vector<Parameter*> mParams;
-	vector<Local*>     mLocals;
-	vector<Temporary*> mTemps;
-	MethodHandler*     mHandler;
-	int                mLocalCnt;
+	Symbol*				mSelector;
+	vector<Variable*>	mParams;
+	vector<Variable*>	mLocals;
+	vector<Variable*>	mTemps;
+	MethodHandler*		mHandler;
+	int					mLocalCnt;
+
+	static int sNextId;
+	static string nextId(bool reset = false)
+	{
+		string s = "F" + to_string(sNextId++);
+		return s;
+	}
 };
 //-------------------------------------------------------
 inline

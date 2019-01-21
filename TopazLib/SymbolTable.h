@@ -30,9 +30,9 @@ public:
 	//---------------------------------------------
 	SymbolTable(vector<Constant*> constants, vector<Class*>& classes);
 
-	Symbol* addSymbol(const string& name, Kind kind, Access access = PROTECTED, bool isStatic = false)
+	Symbol* addSymbol(const string& name, Kind kind)
 	{
-		return mCurScope->add(name, kind, access, isStatic);
+		return mCurScope->add(name, kind);
 	}
 
 	Symbol* lookupSymbol(const string& name)
@@ -40,7 +40,7 @@ public:
 		return mCurScope->lookup(name);
 	}
 
-	Symbol* create(const string& name, Kind kind, Access access = PROTECTED, bool isStatic = false) override;
+	Symbol* create(const string& name, Kind kind) override;
 
 private:
 	Symbol* mCurScope = nullptr;

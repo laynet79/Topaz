@@ -3,6 +3,13 @@
 #include "Class.h"
 
 //-------------------------------------------------------
+int Constant::sNextId = 100;
+int Variable::sNextClassId = 100;
+int Variable::sNextInstId  = 100;
+int Variable::sNextParamId = 100;
+int Variable::sNextLocalId = 100;
+int Variable::sNextTempId  = 100;
+//-------------------------------------------------------
 Value& Symbol::value(VirtualMachine& vm)
 {
 	switch (kind)

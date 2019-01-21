@@ -3,18 +3,15 @@
 #include "Method.h"
 #include "Collection.h"
 
+//-------------------------------------------------------
 SymbolTable::SymbolTable(vector<Constant*> constants, vector<Class*>& classes)
-	: Symbol(nullptr, "global", GLOBAL, "G100"), mConstants(constants), mClasses(classes)
+	: Symbol(nullptr, "global", GLOBAL, "G100", PUBLIC), mConstants(constants), mClasses(classes)
 {
 	// reset symbol ID numbering
-	Class::nextId(true);
-	Method::nextId(true);
-	Constant::nextId(true);
-	ClassVar::nextId(true);
-	InstanceVar::nextId(true);
-	Parameter::nextId(true);
-	Local::nextId(true);
-	Temporary::nextId(true);
+	Class::resetId();
+	Method::resetId();
+	Constant::resetId();
+	Variable::resetId();
 
 	// clear out the constants and class lists
 	mConstants.clear();
@@ -22,14 +19,14 @@ SymbolTable::SymbolTable(vector<Constant*> constants, vector<Class*>& classes)
 	mCurScope = this;
 
 	// add default constants
-	addSymbol("0", NUMBER, PUBLIC);
-	addSymbol("1", NUMBER, PUBLIC);
-	addSymbol("true", BOOL, PUBLIC);
-	addSymbol("false", BOOL, PUBLIC);
-	addSymbol("null", NUMBER, PUBLIC);
+	addSymbol("0", NUMBER);
+	addSymbol("1", NUMBER);
+	addSymbol("true", BOOL);
+	addSymbol("false", BOOL);
+	addSymbol("null", NUMBER);
 }
 //-------------------------------------------------------
-Symbol* SymbolTable::create(const string& name, Kind kind, Access access, bool isStatic)
+Symbol* SymbolTable::create(const string& name, Kind kind)
 {
 	switch (kind)
 	{

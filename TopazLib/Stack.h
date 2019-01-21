@@ -2,7 +2,7 @@
 #include "Value.h"
 #include "Collection.h"
 
-//------------------------------------------------------- test
+//-------------------------------------------------------
 // This class implements the run-time stack of the Topaz
 // virtual machine.  A typical stack frame is shown below,
 // growing down (stack addresses increase downward). Notice
