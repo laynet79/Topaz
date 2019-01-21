@@ -191,7 +191,7 @@ bool Tokenizer::parsePunctuation()
 	return false;
 }
 //-------------------------------------------------------
-// attempt to parse an ID from the front of the input line
+// attempt to parse a keyword from the front of the input line
 //-------------------------------------------------------
 bool Tokenizer::parseKeyword()
 {
@@ -213,7 +213,7 @@ bool Tokenizer::parseKeyword()
 	return false;
 }
 //-------------------------------------------------------
-// attempt to parse a symbol from the
+// attempt to parse a symbol from the front of the input line
 //-------------------------------------------------------
 bool Tokenizer::parseSymbol()
 {
