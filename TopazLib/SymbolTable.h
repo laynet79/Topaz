@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 using namespace std;
 #include "Symbol.h"
 class Class;
@@ -28,7 +29,7 @@ class SymbolTable : public Symbol // the symbol table will represent the global 
 {
 public:
 	//---------------------------------------------
-	SymbolTable(vector<Constant*> constants, vector<Class*>& classes);
+	SymbolTable(vector<Constant*>& constants);
 
 	Symbol* addSymbol(const string& name, Kind kind)
 	{
@@ -42,9 +43,12 @@ public:
 
 	Symbol* create(const string& name, Kind kind) override;
 
+	Class* addClass(const string& name);
+	void removeClass(const string& name);
+
 private:
 	Symbol* mCurScope = nullptr;
-	vector<Constant*>& mConstants;
-	vector<Class*>& mClasses;
+	vector<Constant*>&   mConstants;
+	map<string, Class*> mClasses;
 };
 //-------------------------------------------------------

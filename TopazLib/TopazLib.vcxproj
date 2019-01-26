@@ -55,7 +55,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;TOPAZLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;TOPAZLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -71,7 +71,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;TOPAZLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;TOPAZLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -83,24 +83,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Class.cpp" />
-    <ClCompile Include="Collection.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Method.cpp" />
     <ClCompile Include="MethodHandler.cpp" />
+    <ClCompile Include="Stack.cpp" />
     <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="SymbolTable.cpp" />
     <ClCompile Include="Tokenizer.cpp" />
     <ClCompile Include="Topaz.cpp" />
-    <ClCompile Include="TopazImp.cpp" />
     <ClCompile Include="Value.cpp" />
     <ClCompile Include="VirtualMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallBack.h" />
     <ClInclude Include="Class.h" />
-    <ClInclude Include="Collection.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Method.h" />
@@ -111,8 +109,8 @@
     <ClInclude Include="Token.h" />
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="Topaz.h" />
-    <ClInclude Include="TopazImp.h" />
     <ClInclude Include="Value.h" />
+    <ClInclude Include="ValueType.h" />
     <ClInclude Include="VirtualMachine.h" />
   </ItemGroup>
   <ItemGroup>

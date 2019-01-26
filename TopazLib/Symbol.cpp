@@ -10,7 +10,7 @@ int Variable::sNextParamId = 100;
 int Variable::sNextLocalId = 100;
 int Variable::sNextTempId  = 100;
 //-------------------------------------------------------
-Value& Symbol::value(VirtualMachine& vm)
+Value*& Symbol::value(VirtualMachine& vm)
 {
 	switch (kind)
 	{

@@ -19,16 +19,31 @@ Symbol* Method::create(const string& name, Kind kind)
 	{
 	case PARAM:
 		{
+			if (find(mParams.begin(), mParams.end(), v) != mParams.end())
+			{
+				delete v;
+				throw (string("parameter already exists: ") + name).c_str();
+			}
 			v->address = (int)mParams.size();
 			mParams.push_back(v);
 		}
 	case LOCAL:
 		{
+			if (find(mLocals.begin(), mLocals.end(), v) != mLocals.end())
+			{
+				delete v;
+				throw (string("local already exists: ") + name).c_str();
+			}
 			v->address = (int)mLocals.size();
 			mLocals.push_back(v);
 		}
 	case TEMP:
 		{
+			if (find(mTemps.begin(), mTemps.end(), v) != mTemps.end())
+			{
+				delete v;
+				throw (string("temporary already exists: ") + name).c_str();
+			}
 			v->address = (int)mTemps.size();
 			mTemps.push_back(v);
 		}

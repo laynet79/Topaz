@@ -11,17 +11,31 @@ using namespace std;
 class Command
 {
 public:
-	Command(int line, Symbol* a0 = nullptr, Symbol* a1 = nullptr, Symbol* a2 = nullptr) : mLine(line)
-	{ mArg[0] = a0; mArg[1] = a1; mArg[2] = a2; }
+	Command(int line, Symbol* A = nullptr, Symbol* B = nullptr, Symbol* C = nullptr) : a(A), b(B), c(C), mLine(line) {}
 	virtual string name() const = 0;
-	Symbol* arg(int arg) const { return mArg[arg]; }
 	virtual bool run(VirtualMachine& vm, int& pc) = 0;
-protected:
-	Value& value(VirtualMachine& vm, int arg, Value::Type type=Value::ANY);
-	Symbol* mArg[3];
+	Symbol *a, *b, *c;
 	int mLine;
+protected:
+	Value*& value(VirtualMachine& vm, Symbol* s)			{ return s->value(vm);				}
+	ValueType type(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->type();		}
+	bool boolean(VirtualMachine& vm, Symbol* s)				{ return s->value(vm)->boolean();	}
+	double number(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->number();	}
+	string& str(VirtualMachine& vm, Symbol* s)				{ return s->value(vm)->str();		}
+	string pstr(VirtualMachine& vm, Symbol* s)				{ return s->value(vm)->pstr();		}
+	Instance* object(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->object();	}
+	vector<Value*>& tuple(VirtualMachine& vm, Symbol* s)	{ return s->value(vm)->tuple();		}
+	Tuple* tuplePtr(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->tuplePtr();  }
+	vector<Value*>& list(VirtualMachine& vm, Symbol* s)		{ return s->value(vm)->list();      }
+	List* listPtr(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->listPtr();   }
+
 	void error(const string& msg) { throw string("line ") + to_string(mLine) + " " + msg; }
 };
 //-------------------------------------------------------
-ostream& operator << (ostream& out, const Command& c);
+inline
+ostream& operator << (ostream& out, const Command& c)
+{
+	out << c.name() << " " << (c.a ? c.a->id : "") << " " << (c.b ? c.b->id : "") << " " << (c.c ? c.c->id : "");
+	return out;
+}
 //-------------------------------------------------------

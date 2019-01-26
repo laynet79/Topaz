@@ -67,7 +67,7 @@ public:
 		throw "undefined symbol: " + name;
 	}
 
-	Value& value(VirtualMachine& vm);
+	Value*& value(VirtualMachine& vm);
 
 	Symbol* parent;
 	map<string, Symbol*> mMap;
@@ -76,6 +76,8 @@ public:
 	Kind   kind;
 	Access access;
 	int    address;
+
+	bool operator == (const Symbol& s) { return name == s.name; }
 
 	void toString(ostream& out)
 	{
@@ -91,13 +93,13 @@ public:
 class Constant : public Symbol
 {
 public:
-	Constant(const string& name, const Value& value)
+	Constant(const string& name, Value* value)
 		: Symbol(nullptr, name, CONSTANT, nextId(), PUBLIC), mValue(value) {}
-	Value& value() { return mValue; }
+	Value*& value() { return mValue; }
 
 	static void resetId() { sNextId = 100; }
 protected:
-	Value  mValue;
+	Value*  mValue;
 
 	static int sNextId;
 	static string nextId()
@@ -113,10 +115,15 @@ class Variable : public Symbol
 {
 public:
 	Variable(Symbol* parent, const string& name, Kind kind)
-		: Symbol(parent, name, getKind(name, kind), nextId(name, kind), name[0] == '_' ? PROTECTED : PUBLIC) {}
-	Value& value() { return mValue; }
+		: Symbol(parent, name, getKind(name, kind), nextId(name, kind), name[0] == '_' ? PROTECTED : PUBLIC),
+		mValue(Null::value()) {}
+
+	Value*& value() { return mValue; }
 
 	static void resetId() { sNextClassId = sNextInstId = sNextParamId = sNextLocalId = sNextTempId = 100; }
+
+	//bool operator == (const Variable& b) { return name == b.name; }
+
 protected:
 	static Kind getKind(const string& name, Kind kind)
 	{
@@ -125,7 +132,7 @@ protected:
 		return kind;
 	}
 
-	Value  mValue;
+	Value*  mValue;
 
 	static int sNextClassId;
 	static int sNextInstId;

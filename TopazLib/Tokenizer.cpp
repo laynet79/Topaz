@@ -180,8 +180,8 @@ bool Tokenizer::parseKeyword()
 	static regex keywords[]
 	{
 		regex("^case"), regex("^class"), regex("^else"), regex("^false"), regex("^for"), 
-		regex("^if"), regex("^in\s"), regex("^switch"), regex("^true"), 
-		regex("^do"), regex("^this"), regex("^null"), regex("^while")
+		regex("^if"), regex("^in\\s"), regex("^switch"), regex("^true"), 
+		regex("^do"), regex("^this"), regex("^null"), regex("^while"), regex("^return")
 	};
 	for (regex& re : keywords)
 	{

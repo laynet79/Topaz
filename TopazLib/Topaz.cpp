@@ -1,28 +1,70 @@
 #include <string>
 #include <fstream>
 using namespace std;
+#include <cstdarg>
 
 #include "Topaz.h"
-#include "TopazImp.h"
+#include "VirtualMachine.h"
 
 //-------------------------------------------------------
 Topaz::Topaz()
 {
-	mImp = new TopazImp();
+	vm = new VirtualMachine();
 }
 //-------------------------------------------------------
 Topaz::~Topaz()
 {
-	delete mImp;
+	delete vm;
+}
+
+void Topaz::run() { vm->run(); }
+
+//-------------------------------------------------------
+void Topaz::compile(const string & input)
+{
+	vm->compile(input);
 }
 //-------------------------------------------------------
-void Topaz::run()
+Value* Topaz::call(Value* object, const string& cls, const string& name, int argCnt, ...)
 {
-	mImp->run();
+	va_list args;
+	va_start(args, argCnt);
+	Value* result = vm->call(object, cls, name, argCnt, args);
+	va_end(args);
+	return result;
 }
 //-------------------------------------------------------
-bool Topaz::compile(const string & input)
+Class* Topaz::addClass(const string& name, int varCnt, ...)
 {
-	return mImp->compile(input);
+	va_list args;
+	va_start(args, varCnt);
+	Class* cls = vm->addClass(name, varCnt, args);
+	va_end(args);
+	return cls;
 }
+//-------------------------------------------------------
+void Topaz::addMethod(Class* cls, const string& name, CallBack* handler, int paramCnt, ...)
+{
+	va_list args;
+	va_start(args, paramCnt);
+	vm->addMethod(cls, name, handler, paramCnt, args);
+	va_end(args);
+}
+//-------------------------------------------------------
+ValueType Topaz::type(Value* v) { return vm->type(v); }
+string Topaz::toStr(Value* v)   { return vm->toStr(v); }
+//-------------------------------------------------------
+Value* Topaz::value(bool b)   { return vm->value(b); }
+Value* Topaz::value(double n) { return vm->value(n); }
+Value* Topaz::value(const string& s) { return vm->value(s); }
+Value* Topaz::valueTuple(const vector<Value*>& t) { return vm->valueTuple(t); }
+Value* Topaz::valueList(const vector<Value*>& l) { return vm->valueList(l); }
+//-------------------------------------------------------
+bool   Topaz::boolean(Value* v) { return v->boolean(); }
+double Topaz::number(Value* v) { return v->number(); }
+string Topaz::str(Value* v) { return v->str(); }
+vector<Value*>& Topaz::tuple(Value* v) { return v->tuple(); }
+vector<Value*>& Topaz::list(Value* v) { return v->list(); }
+//-------------------------------------------------------
+void Topaz::release(Value* v) { if (v) v->deref(); }
 //-------------------------------------------------------

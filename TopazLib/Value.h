@@ -1,77 +1,255 @@
 #pragma once
-#include <iostream>
 #include <string>
+#include <vector>
+#include <iostream>
+#include <stdio.h>
 using namespace std;
-class Object;
-class String;
-class Instance;
+#include "ValueType.h"
+class Class;
 class Tuple;
 class List;
-
-#pragma warning(push)
-#pragma warning(disable: 26495)
+class Instance;
 
 //-------------------------------------------------------
-// this class represents a data Value in Topaz.  A union
-// is used so that a value can represent any data type
-// used in the language. Simple types like numbers and
-// booleans are stored directly in the Value object, and
-// complex types are store using a pointer (reference type).
-// All reference types maintain a reference count so that
-// when they are no longer referenced, they can be automatically
-// deleted.  The Value class overloads the assignment operator
-// so that when a values type is changed to or from a 
-// reference type, that it assists in maintaining that
-// reference count.
+// This class is the base class for all Topaz data types
 //-------------------------------------------------------
-class __declspec(dllexport) Value
+class Value
 {
 public:
-	enum Type { INDEX=1, NIL=2, BOOL=4, NUMBER=8, STRING=16, TUPLE=32, LIST=64, ANY=0xFF  };
+	Value() : mRefCnt(0) {}
+	virtual ~Value() {}
 
-	Value(bool value) : mType(BOOL), mBool(value) {}
-	Value(double value) : mType(NUMBER), mNumber(value) {}
-	Value(String* value) : mType(STRING), mString(value) {}
-	Value(Tuple* value) : mType(TUPLE), mTuple(value) {}
-	Value(List* value) : mType(LIST), mList(value) {}
-	Value() : mType(NIL), mObject(nullptr) {}
-	Value(int index) : mType(INDEX), mIndex(index) {}
+	static void set(Value*& v, Value* w)
+	{
+		if (w)
+			w->ref();
+		if (v)
+			v->deref();
+		v = w;
+	}
 
-	~Value();
-	Value& operator = (const Value& value);
+	Value* ref()
+	{
+		if (mRefCnt > 0)
+			mRefCnt++;
+		return this;
+	}
 
-	int index() const		{ return mIndex;  }
-	Type type() const		{ return mType;   }
-	bool boolean() const	{ return mBool;   }
-	double number() const	{ return mNumber; }
-	Object* object() const  { return mObject; }
-	String* str() const	{ return mString; }
-	Tuple* tuple() const	{ return mTuple;  }
-	List* list() const		{ return mList;   }
+	Value* deref()
+	{
+		if (mRefCnt > 0)
+			mRefCnt--;
+		if (mRefCnt == 0)
+		{
+			delete this;
+			return nullptr;
+		}
+		return this;
+	}
+
+	virtual ValueType type() = 0;
+	virtual string toString() = 0;
 
 	string typeName()
 	{
-		static const string typeNames[] = { "INDEX", "NIL", "BOOL", "NUMBER", "STRING", "TUPLE", "LIST", "ANY" };
-		return typeNames[mType];
+		static string names[] = { "object", "bool", "number", "string", "tuple", "list", "null" };
+		return names[type()];
 	}
 
-	string toString();
+	static Value* boolean(bool v);
+	static Value* number(double v);
+	static Value* str(const string& v);
+	static Value* object(Class* cls);
+	static Value* tuple(const vector<Value*>& v);
+	static Value* list(const vector<Value*> v);
+
+	bool boolean();
+	double number();
+	string& str();
+	string pstr();
+	Instance* object();
+	vector<Value*>& tuple();
+	vector<Value*>& list();
+	Tuple* tuplePtr();
+	List* listPtr();
+
+	bool operator == (const Value& b);
+	bool operator != (const Value& b) { return !(*this == b); }
+
+protected:
+	int mRefCnt;
+};
+//-------------------------------------------------------
+inline
+ostream& operator << (ostream& out, Value& v)
+{
+	out << v.toString();
+	return out;
+}
+//-------------------------------------------------------
+// This class represents a Topaz boolean value
+//-------------------------------------------------------
+class Boolean : public Value
+{
+public:
+	static Value*& value(bool b) { return b ? sTrue : sFalse; }
+	Boolean(bool v) : mValue(v) { mRefCnt = -1; }
+	bool value() { return mValue; }
+	ValueType type() override { return ValueType::BOOLEAN; }
+	string toString() override { return mValue ? "true" : "false"; }
 private:
-	Type mType;
-	union
-	{
-		bool    mBool;
-		double  mNumber;
-		int     mIndex;
-		Object* mObject;
-		String* mString;
-		Tuple*  mTuple;
-		List*   mList;
-	};
+	bool mValue;
+	static Value* sTrue;
+	static Value* sFalse;
 };
 
-#pragma warning(pop)
-
 //-------------------------------------------------------
-ostream& operator << (ostream& out, const Value& v);
+// This class represents the null value
+//-------------------------------------------------------
+class Null : public Value
+{
+public:
+	Null() { mRefCnt = -1; }
+	static Value*& value() { return sNull; }
+	ValueType type() override { return NIL; }
+	string toString() override { return "null"; }
+private:
+	static Value* sNull;
+};
+//-------------------------------------------------------
+// This class represents the number data type
+//-------------------------------------------------------
+class Number : public Value
+{
+public:
+	Number(double v) : mValue(v) {}
+	double value() { return mValue; }
+	int intValue() { return (int)mValue; }
+	ValueType type() override { return NUMBER; }
+	string toString() override { char buf[32]; sprintf(buf, "%g", mValue); return string(buf); }
+private:
+	double mValue;
+};
+//-------------------------------------------------------
+// This class represents the string data type
+//-------------------------------------------------------
+class String : public Value
+{
+public:
+	String(const string& v) : mValue(v) {}
+	string& value() { return mValue; }
+	ValueType type() override { return STRING; }
+	string toString() override { return mValue; }
+private:
+	string mValue;
+};
+//-------------------------------------------------------
+// This class represents the tuple data type
+//-------------------------------------------------------
+class Tuple : public Value
+{
+public:
+	Tuple(const vector<Value*>& v) : mValue(v) {}
+	vector<Value*>& value() { return mValue; }
+	ValueType type() override { return TUPLE; }
+	string toString() override
+	{
+		string n = "(";
+		for (int i = 0; i < mValue.size(); i++)
+		{
+			if (i > 0)
+				n += ",";
+			n += mValue[i]->toString();
+		}
+		n += ")";
+		return n;
+	}
+	bool operator == (const Tuple& b)
+	{
+		if (mValue.size() != b.mValue.size())
+			return false;
+		for (int i = 0; i < mValue.size(); i++)
+		{
+			if (*mValue[i] != *b.mValue[i])
+				return false;
+		}
+		return true;
+	}
+
+private:
+	vector<Value*> mValue;
+};
+//-------------------------------------------------------
+// This class represents the list data type
+//-------------------------------------------------------
+class List : public Value
+{
+public:
+	List(const vector<Value*>& v) : mValue(v) {}
+	vector<Value*>& value() { return mValue; }
+	ValueType type() override { return LIST; }
+
+	List* add(List* b)
+	{
+		vector<Value*> n(mValue.size() + b->mValue.size());
+		for (Value* v : mValue)
+			n.push_back(v);
+		for (Value* v : b->mValue)
+			n.push_back(v);
+		return new List(n);
+	}
+
+	List* slice(int start, int end)
+	{
+		if (start < 0 || start >= mValue.size() || end < start || end >= mValue.size())
+			throw "invalid slice detected";
+		vector<Value*> n;
+		for (int i = start; i < end; i++)
+			n.push_back(mValue[i]);
+		return new List(n);
+	}
+
+	string toString() override
+	{
+		string n = "[";
+		for (int i = 0; i < mValue.size(); i++)
+		{
+			if (i > 0)
+				n += ",";
+			n += mValue[i]->toString();
+		}
+		n += "]";
+		return n;
+	}
+
+	bool operator == (const List& b)
+	{
+		if (mValue.size() != b.mValue.size())
+			return false;
+		for (int i = 0; i < mValue.size(); i++)
+		{
+			if (*mValue[i] != *b.mValue[i])
+				return false;
+		}
+		return true;
+	}
+
+private:
+	vector<Value*> mValue;
+};
+//-------------------------------------------------------
+// This class represents an instant object
+//-------------------------------------------------------
+class Instance : public Value
+{
+public:
+	Instance(Class* cls, int size);
+	Value*& operator[](int index) { return mValue[index]; }
+	ValueType type() override { return OBJECT; }
+	Class* cls() { return mClass; }
+	string toString() override;
+private:
+	Class* mClass;
+	vector<Value*> mValue;
+};
 //-------------------------------------------------------

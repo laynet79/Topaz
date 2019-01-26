@@ -1,13 +1,29 @@
-#include "Collection.h"
 #include "Class.h"
 #include "Method.h"
+#include <algorithm>
 
 //-------------------------------------------------------
 int Class::sNextId = 100;
 //-------------------------------------------------------
+Class::~Class()
+{
+	for (Variable* v : mClassVars)
+		delete v;
+	for (Variable* v : mInstanceVars)
+		delete v;
+	for (auto p : mMethods)
+		delete p.second;
+}
+//-------------------------------------------------------
 void Class::run(VirtualMachine& vm)
 {
 	mMain->run(vm);
+}
+//-------------------------------------------------------
+void Class::reset()
+{
+	for (Variable* v : mClassVars)
+		Value::set(v->value(), Null::value());
 }
 //-------------------------------------------------------
 Symbol* Class::create(const string& name, Kind kind)
@@ -19,12 +35,22 @@ Symbol* Class::create(const string& name, Kind kind)
 		Variable* v = new Variable(this, name, kind);
 		if (v->kind == STATIC)
 		{
+			if (find(mClassVars.begin(), mClassVars.end(), v) != mClassVars.end())
+			{
+				delete v;
+				throw (string("variable already exists: ") + name).c_str();
+			}
 			v->address = (int)mClassVars.size();
 			mClassVars.push_back(v);
 			return v;
 		}
 		else
 		{
+			if (find(mInstanceVars.begin(), mInstanceVars.end(), v) != mInstanceVars.end())
+			{
+				delete v;
+				throw (string("variable already exists: ") + name).c_str();
+			}
 			v->address = (int)mInstanceVars.size();
 			mInstanceVars.push_back(v);
 			return v;
@@ -33,7 +59,13 @@ Symbol* Class::create(const string& name, Kind kind)
 	case METHOD:
 	{
 		Method* m = new Method(this, name, access, nullptr);
+		if (mMethods.find(m->selector()) != mMethods.end())
+		{
+			delete m;
+				throw (string("variable already exists: ") + name).c_str();
+		}
 		mMethods[m->selector()] = m;
+		mMethodsByName[name] = m;
 		if (m->name == "Main")
 			mMain = m;
 		return m;
@@ -43,6 +75,6 @@ Symbol* Class::create(const string& name, Kind kind)
 	}
 }
 //-------------------------------------------------------
-Instance* Class::createInstance() { return new Instance(this); }
+Instance* Class::createInstance() { return new Instance(this, (int)mInstanceVars.size()); }
 //-------------------------------------------------------
 

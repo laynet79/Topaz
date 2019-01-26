@@ -20,6 +20,8 @@ public:
 
 	Symbol* create(const string& name, Kind kind) override;
 
+	void setHandler(MethodHandler* handler) { mHandler = handler; }
+
 	void link();
 
 	Symbol* selector() { return mSelector; }
