@@ -9,7 +9,7 @@ Method::Method(Symbol* c, const string& name, Access access, MethodHandler* hand
 {
 	// create a global string constant using the method name that will
 	// be used a key to lookup methods of this name
-	mSelector = this->add(name, GLOBAL);
+	mSelector = this->add(name, STRING);
 }
 //-------------------------------------------------------
 Symbol* Method::create(const string& name, Kind kind)
@@ -18,25 +18,27 @@ Symbol* Method::create(const string& name, Kind kind)
 	switch (v->kind)
 	{
 	case PARAM:
+	{
+		if (find(mParams.begin(), mParams.end(), v) != mParams.end())
 		{
-			if (find(mParams.begin(), mParams.end(), v) != mParams.end())
-			{
-				delete v;
-				throw (string("parameter already exists: ") + name).c_str();
-			}
-			v->address = (int)mParams.size();
-			mParams.push_back(v);
+			delete v;
+			throw (string("parameter already exists: ") + name).c_str();
 		}
+		v->address = (int)mParams.size();
+		mParams.push_back(v);
+		break;
+	}
 	case LOCAL:
+	{
+		if (find(mLocals.begin(), mLocals.end(), v) != mLocals.end())
 		{
-			if (find(mLocals.begin(), mLocals.end(), v) != mLocals.end())
-			{
-				delete v;
-				throw (string("local already exists: ") + name).c_str();
-			}
-			v->address = (int)mLocals.size();
-			mLocals.push_back(v);
+			delete v;
+			throw (string("local already exists: ") + name).c_str();
 		}
+		v->address = (int)mLocals.size();
+		mLocals.push_back(v);
+		break;
+	}
 	case TEMP:
 		{
 			if (find(mTemps.begin(), mTemps.end(), v) != mTemps.end())

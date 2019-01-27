@@ -4,8 +4,19 @@ using namespace std;
 
 int main()
 {
-	Topaz* topaz = new Topaz();
-	topaz->run();
+	Topaz t;
+	try
+	{
+		double n = 4.0;
+		Value* r = t.call(nullptr, "Math", "sqrt", 1, t.value(n));
+		cout << "sqrt(" << n << ")=" << t.str(r) << endl;
+	}
+	catch (char* msg)
+	{
+		cout << "ERROR: " << msg << endl;
+	}
+
+	//t.runTest();
 	system("PAUSE");
 	return 0;
 }

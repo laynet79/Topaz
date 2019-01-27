@@ -41,6 +41,19 @@ public:
 		return mCurScope->lookup(name);
 	}
 
+	Class* lookupClass(const string& name)
+	{
+		try
+		{
+			Symbol* s = lookup(name, false);
+			if (s->kind != CLASS)
+				return nullptr;
+			return (Class*)s;
+		}
+		catch (...) {}
+		return nullptr;
+	}
+
 	Symbol* create(const string& name, Kind kind) override;
 
 	Class* addClass(const string& name);

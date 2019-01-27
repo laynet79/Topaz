@@ -5,16 +5,6 @@
 //-------------------------------------------------------
 int Class::sNextId = 100;
 //-------------------------------------------------------
-Class::~Class()
-{
-	for (Variable* v : mClassVars)
-		delete v;
-	for (Variable* v : mInstanceVars)
-		delete v;
-	for (auto p : mMethods)
-		delete p.second;
-}
-//-------------------------------------------------------
 void Class::run(VirtualMachine& vm)
 {
 	mMain->run(vm);
@@ -23,7 +13,7 @@ void Class::run(VirtualMachine& vm)
 void Class::reset()
 {
 	for (Variable* v : mClassVars)
-		Value::set(v->value(), Null::value());
+		Value::set(v->value(), (Value*)nullptr);
 }
 //-------------------------------------------------------
 Symbol* Class::create(const string& name, Kind kind)

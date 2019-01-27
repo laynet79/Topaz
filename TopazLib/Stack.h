@@ -13,27 +13,27 @@
 // parameters can be indexed correctly relative to the
 // frame pointer.
 //
-//	|					|
+//	|					| 
 //	+-------------------+
-//	|		param 0		|
+//	|		param 0		| 0
 //	+-------------------+
-//	|		...			|
+//	|		...			| 1
 //	+-------------------+
-//	|		param n		|
+//	|		param n		| 2
 //	+-------------------+
-//	|	previous FP		|	<--- FP (frame pointer)
+//	|	previous FP		| 3	<--- FP (frame pointer)
 //	+-------------------+
-//	|	param Cnt		|
+//	|	param Cnt		| 4
 //	+-------------------+
-//	|	this pointer	|
+//	|	this pointer	| 5
 //	+-------------------+
-//	|		local 0		|
+//	|		local 0		| 6
 //	+-------------------+
-//	|		...			|
+//	|		...			| 7
 //	+-------------------+
-//	|		local n		|
+//	|		local n		| 8
 //	+-------------------+
-//	|					|	<--- TOS (top of stack)
+//	|					| 9	<--- TOS (top of stack)
 //
 //-------------------------------------------------------
 class Stack
@@ -48,9 +48,14 @@ public:
 	{
 		// release all stack owned reference values
 		for (int i = 0; i < STACK_SIZE; i++)
-			Value::set(mStack[i], Null::value());
+			Value::set(mStack[i], nullptr);
 		mTos = mFrame = 0;
+		push(Value::number(0.0));
+		push(Value::number(0.0));
 	}
+
+	void push(int v) { push(Value::number(v)); }
+	int stackInt(int n) { return mStack[n]->integer(); }
 
 	void push(Value* value)
 	{
@@ -67,46 +72,58 @@ public:
 	void pop(int cnt)
 	{
 		for (int i = 0; i < cnt; i++)
-			Value::set(mStack[--mTos], Null::value());
+			Value::set(mStack[--mTos], nullptr);
 	}
 	Value* pop()
 	{
-		Value* v;
+		Value* v = nullptr;
 		Value::set(v, mStack[--mTos]);
-		Value::set(mStack[mTos], Null::value());
+		Value::set(mStack[mTos], nullptr);
 		return v;
 	}
-	void newFrame(Instance* inst, int paramCnt, int localCnt)
+	void newFrame(Value* inst, int paramCnt, int localCnt)
 	{
 		int prevFrame = mFrame;
 		mFrame = mTos;
-		push(Value::number(prevFrame));
-		push(Value::number(paramCnt));
-		push((Value*)inst);
+		push(prevFrame);
+		push(paramCnt);
+		push(inst);
 		reserve(localCnt);
+		mParamCnt = paramCnt;
 	}
-	void popFrame()
+	void popFrame(Value* rtn)
 	{
-		mTos = mFrame;
-		mFrame = ((Number*)mStack[mFrame])->intValue();
+		int prevFrame = stackInt(mFrame);
+		int popCnt = mTos - mFrame + mParamCnt;
+		pop(popCnt);
+		mFrame = prevFrame;
+		mParamCnt = stackInt(mFrame+1);
+		push(rtn);
 	}
 	Instance* inst()
 	{
 		return (Instance*)mStack[mFrame + 2];
 	}
+
+	int paramCnt() { return mParamCnt; }
+
 	Value*& param(int i)
 	{
+		if (i < 0 || i >= mParamCnt)
+			throw "parameter does not exist";
 		return mStack[mFrame - ((Number*)mStack[mFrame+1])->intValue() + i];
 	}
+
 	Value*& local(int i)
 	{
 		return mStack[mFrame + i + 3];
 	}
-	
+
 private:
 	static const int STACK_SIZE = 65536;
 	int mTos = 0;
 	int mFrame = 0;
+	int mParamCnt = 0;
 	Value* mStack[STACK_SIZE] = { nullptr };
 };
 

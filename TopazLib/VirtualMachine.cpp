@@ -10,6 +10,7 @@
 //-------------------------------------------------------
 VirtualMachine::VirtualMachine() : mSymbols(mConstants)
 {
+	mMath.initialize(*this);
 }
 //-------------------------------------------------------
 VirtualMachine::~VirtualMachine()
@@ -21,7 +22,7 @@ Value*& VirtualMachine::constant(int index)
 	Constant* c = mConstants[index]; return c->value();
 }
 //-------------------------------------------------------
-void VirtualMachine::run()
+void VirtualMachine::runTest()
 {
 	ifstream f("test.txt");
 	string input = "";
@@ -53,7 +54,21 @@ Value* VirtualMachine::call(Value* object, const string& cls, const string& name
 }
 Value* VirtualMachine::call(Value* object, const string& cls, const string& name, int argCnt, va_list args)
 {
-	return nullptr;
+	Class* c = mSymbols.lookupClass(cls);
+	Method* m;
+	if (c == nullptr || (m = c->lookupMethod(name)) == nullptr)
+		throw string("method does not exist: ") + cls + "." + name;
+	for (int i = 0; i < argCnt; i++)
+	{
+		Value* arg = va_arg(args, Value*);
+		push(arg);
+	}
+	if (object == nullptr)
+		object = c->nullInstance();
+	newFrame(object, argCnt, 0);
+	m->run(*this);
+	Value* result = pop();
+	return result;
 }
 //-------------------------------------------------------
 Class* VirtualMachine::addClass(const string& name, int varCnt, ...)
@@ -70,8 +85,8 @@ Class* VirtualMachine::addClass(const string& name, int varCnt, va_list args)
 	Class* cls = (Class*)mSymbols.add(name, Symbol::Kind::CLASS);
 	for (int i = 0; i < varCnt; i++)
 	{
-		string varName = va_arg(args, char*);
-		cls->add(varName, Symbol::Kind::MEMBER);
+		string var = va_arg(args, char*);
+		cls->add(var, Symbol::Kind::MEMBER);
 	}
 	return cls;
 }
@@ -93,13 +108,13 @@ void VirtualMachine::addMethod(Class* cls, const string& name, CallBack* handler
 	m->setHandler(new NativeMethodHandler(handler));
 	for (int i = 0; i < paramCnt; i++)
 	{
-		string methodName = va_arg(args, char*);
-		m->add(methodName, Symbol::Kind::PARAM);
+		string param = va_arg(args, char*);
+		m->add(param, Symbol::Kind::PARAM);
 	}
+	m->link();
 }
 //-------------------------------------------------------
 ValueType VirtualMachine::type(Value* v) { return v->type(); }
-string VirtualMachine::toStr(Value* v) { return v->toString(); }
 
 //-------------------------------------------------------
 Value* VirtualMachine::value(bool b) { return Value::boolean(b); }
@@ -111,10 +126,35 @@ Value* VirtualMachine::valueList(const vector<Value*>& l) { return Value::list(l
 //-------------------------------------------------------
 bool   VirtualMachine::boolean(Value* v) { return v->boolean(); }
 double VirtualMachine::number(Value* v) { return v->number(); }
-string VirtualMachine::str(Value* v) { return v->str(); }
+string VirtualMachine::str(Value* v) { return v->toString(); }
 vector<Value*>& VirtualMachine::tuple(Value* v) { return v->tuple(); }
 vector<Value*>& VirtualMachine::list(Value* v) { return v->list(); }
 
 //-------------------------------------------------------
 void VirtualMachine::release(Value* v) { if (v) v->deref(); }
+
+//-------------------------------------------------------
+void VirtualMachine::verifyParamCnt(int n)
+{
+	if (mStack.paramCnt() != n)
+		throw "wrong number of parameters";
+}
+bool VirtualMachine::boolParam(int i) { return mStack.param(i)->boolean(); }
+double VirtualMachine::numberParam(int i) { return mStack.param(i)->number(); }
+string& VirtualMachine::stringParam(int i) { return mStack.param(i)->str(); }
+vector<Value*>& VirtualMachine::tupleParam(int i) { return mStack.param(i)->tuple(); }
+vector<Value*>& VirtualMachine::listParam(int i) { return mStack.param(i)->list(); }
+
+//-------------------------------------------------------
+void VirtualMachine::Return(Value* v) { mStack.popFrame(v); }
+void VirtualMachine::Return(bool v) { mStack.popFrame(Value::boolean(v)); }
+void VirtualMachine::Return(double v) { mStack.popFrame(Value::number(v)); }
+void VirtualMachine::Return(const string& v) { mStack.popFrame(Value::str(v)); }
+void VirtualMachine::ReturnTuple(vector<Value*>& v) { mStack.popFrame(Value::tuple(v)); }
+void VirtualMachine::ReturnList(vector<Value*>& v) { mStack.popFrame(Value::tuple(v)); }
+
+//-------------------------------------------------------
+void VirtualMachine::push(Value* v) { mStack.push(v); }
+Value* VirtualMachine::pop() { return mStack.pop(); }
+void VirtualMachine::newFrame(Value* inst, int paramCnt, int localCnt) { mStack.newFrame(inst, paramCnt, localCnt); }
 //-------------------------------------------------------

@@ -15,7 +15,7 @@ class VirtualMachine;
 class Symbol
 {
 public:
-	enum Kind { GLOBAL, CLASS, METHOD, MEMBER, STATIC, INSTANCE, PARAM, LOCAL, TEMP, CONSTANT, NUMBER, BOOL, STRING };
+	enum Kind { CLASS, METHOD, MEMBER, STATIC, INSTANCE, PARAM, LOCAL, TEMP, CONSTANT, NUMBER, BOOL, STRING };
 	enum Access { PUBLIC, PROTECTED };
 
 	Symbol(Symbol* parent, const string& name, Kind kind, const string& id, Access access)
@@ -41,13 +41,15 @@ public:
 		Symbol* s = nullptr;
 		try
 		{
-			s = lookup(name);
+			s = lookup(name, false);
 			if (s->kind == CONSTANT)
 				return s;
 			throw "redefinition: " + name;
 		}
 		catch (...) {}
 		s = create(name, kind);
+		if (s == nullptr)
+			s = nullptr;
 		mMap[name] = s;
 		return s;
 	}
@@ -116,7 +118,7 @@ class Variable : public Symbol
 public:
 	Variable(Symbol* parent, const string& name, Kind kind)
 		: Symbol(parent, name, getKind(name, kind), nextId(name, kind), name[0] == '_' ? PROTECTED : PUBLIC),
-		mValue(Null::value()) {}
+		mValue(nullptr) {}
 
 	Value*& value() { return mValue; }
 

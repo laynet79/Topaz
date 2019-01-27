@@ -8,6 +8,7 @@ class Constant;
 #include "CallBack.h"
 #include "Stack.h"
 #include "SymbolTable.h"
+#include "Math.h"
 
 class VirtualMachine
 {
@@ -18,16 +19,26 @@ public:
 	Value*& constant(int index);
 	Stack& stack() { return mStack; }
 
-	void run();
+	//------------------------------------------
+	// run a test
+	void runTest();
 
+	//------------------------------------------
+	// Compile a Topaz source code file
 	void compile(const string& input);
 
+	//------------------------------------------
+	// call a class function
 	Value* call(Value* object, const string& cls, const string& name, int argCnt, ...);
 	Value* call(Value* object, const string& cls, const string& name, int argCnt, va_list args);
 
+	//------------------------------------------
+	// add a new class to the virtual machine
 	Class* addClass(const string& name, int varCnt, ...);
 	Class* addClass(const string& name, int varCnt, va_list args);
 
+	//------------------------------------------
+	// add a method to a new class
 	void addMethod(Class* cls, const string& name, CallBack* handler, int paramCnt, ...);
 	void addMethod(Class* cls, const string& name, CallBack* handler, int paramCnt, va_list args);
 
@@ -36,11 +47,7 @@ public:
 	ValueType type(Value* v);
 
 	//------------------------------------------
-	// convert to printable string
-	string toStr(Value* v);
-
-	//------------------------------------------
-	// these methods construct a value out of the given data
+	// construct a value out of the given data
 	Value* value(bool b);
 	Value* value(double n);
 	Value* value(const string& s);
@@ -48,8 +55,8 @@ public:
 	Value* valueList(const vector<Value*>& l);
 
 	//------------------------------------------
-	// these methods retrieve the data out of a value object
-	// (throws a char* exception)
+	// retrieve the data out of a value
+	// (throws exception if value type doesn't match request)
 	bool   boolean(Value* v);
 	double number(Value* v);
 	string str(Value* v);
@@ -60,9 +67,36 @@ public:
 	// This function is called to release a value.
 	void release(Value* v);
 
+	//------------------------------------------
+	// these methods retrieve parameters off of the
+	// runtime stack.
+	// (throws a char* exception)
+	void verifyParamCnt(int n);
+	bool boolParam(int i);
+	double numberParam(int i);
+	string& stringParam(int i);
+	vector<Value*>& tupleParam(int i);
+	vector<Value*>& listParam(int i);
+
+	//------------------------------------------
+	// These methods are used return a value from a function
+	void Return(Value* v);
+	void Return(bool v);
+	void Return(double v);
+	void Return(const string& v);
+	void ReturnTuple(vector<Value*>& v);
+	void ReturnList(vector<Value*>& v);
+
+	//------------------------------------------
+	// push and pop values on/off the run-time stack
+	// (this are for internal use only)
+	void push(Value* v);
+	Value* pop();
+	void newFrame(Value* inst, int paramCnt, int localCnt);
 
 private:
 	SymbolTable mSymbols;
 	vector<Constant*> mConstants;
 	Stack mStack;
+	Math mMath;
 };

@@ -4,7 +4,7 @@
 
 //-------------------------------------------------------
 SymbolTable::SymbolTable(vector<Constant*>& constants)
-	: Symbol(nullptr, "global", GLOBAL, "G100", PUBLIC), mConstants(constants)
+	: Symbol(nullptr, "global", STRING, "G100", PUBLIC), mConstants(constants)
 {
 	// reset symbol ID numbering
 	Class::resetId();
