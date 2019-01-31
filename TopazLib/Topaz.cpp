@@ -63,7 +63,15 @@ Value* Topaz::valueList(const vector<Value*>& l) { return vm->valueList(l); }
 //-------------------------------------------------------
 bool   Topaz::boolean(Value* v) { return v->boolean(); }
 double Topaz::number(Value* v) { return v->number(); }
-string Topaz::str(Value* v) { return v->toString(); }
+string Topaz::str(Value* v, bool quoted)
+{
+	if (v == nullptr)
+		return "null";
+	if (quoted && v->type() == STRING)
+		return "\"" + v->str() + "\"";
+	else
+		return v->str();
+}
 vector<Value*>& Topaz::tuple(Value* v) { return v->tuple(); }
 vector<Value*>& Topaz::list(Value* v) { return v->list(); }
 

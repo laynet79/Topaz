@@ -100,6 +100,45 @@ public:
 	}
 };
 //-------------------------------------------------------
+// Index
+//-------------------------------------------------------
+class Index : public Command
+{
+public:
+	Index(Symbol* v, Symbol* i, Symbol* d, int line) : Command(line, v, i, d) {}
+	string name() const override { return "IDX"; }
+	bool run(VirtualMachine& vm, int& pc) override
+	{
+		int index = integer(vm, b);
+		switch (type(vm, a))
+		{
+		case ValueType::STRING:
+		{
+			string s = str(vm, a);
+			if (index >= s.size())
+				error("index out of range");
+			set(vm, c, string(1, s[index]));
+			break;
+		}
+		case ValueType::TUPLE:
+		case ValueType::LIST:
+		{
+			vector<Value*>& s = tuple(vm, a);
+			if (index >= s.size())
+				error("index out of range");
+			set(vm, c, s[index]);
+			break;
+		}
+
+		default:
+			error("invalid type for indexing");
+			break;
+		}
+		pc += 1;
+		return true;
+	}
+};
+//-------------------------------------------------------
 // Push
 //-------------------------------------------------------
 class Push : public Command
@@ -133,18 +172,16 @@ public:
 class Call : public Command
 {
 public:
-	Call(Symbol* c, Symbol* i, Symbol* m, int line = 0) : Command(line, m) {}
+	Call(Symbol* obj, Symbol* meth, Symbol* pcnt, int line = 0) : Command(line, obj, meth, pcnt) {}
 	string name() const override { return "CAL"; }
 	bool run(VirtualMachine& vm, int& pc) override
 	{
-		Class* cls = (Class*)a;
-		Instance* object = inst(vm, b);
-		Symbol* selector = c;
-		Method* m = cls->lookupMethod(selector);
-		if (m == nullptr)
-			error(string("undefined method: ") + selector->name + string(" class: ") + object->cls()->name);
-		vm.newFrame(object, m->paramCnt(), m->localCnt());
-		m->run(vm);
+		Instance* object = inst(vm, a);
+		Symbol* selector = b;
+		int paramCnt = integer(vm, c);
+		Method* m = object->cls()->lookupMethod(selector);
+		int localCnt = m ? m->localCnt() : 0;
+		vm.makeCall((Instance*)object, m, selector->name, paramCnt, 0);
 		pc += 1;
 		return true;
 	}

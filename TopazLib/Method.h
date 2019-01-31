@@ -30,6 +30,8 @@ public:
 
 	void run(VirtualMachine& vm);
 
+	void displayCall(VirtualMachine& vm);
+
 protected:
 	Symbol*				mSelector;
 	vector<Variable*>	mParams;

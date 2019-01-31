@@ -25,23 +25,24 @@ public:
 	void runTest();
 
 	//------------------------------------------
+	// set the output stream for error messages
+	void setOutputStream(ostream& output);
+
+	//------------------------------------------
 	// Compile a Topaz source code file
 	void compile(const string& input);
 
 	//------------------------------------------
 	// call a class function
 	Value* call(Value* object, const string& cls, const string& name, int argCnt, ...);
-	Value* call(Value* object, const string& cls, const string& name, int argCnt, va_list args);
 
 	//------------------------------------------
 	// add a new class to the virtual machine
 	Class* addClass(const string& name, int varCnt, ...);
-	Class* addClass(const string& name, int varCnt, va_list args);
 
 	//------------------------------------------
 	// add a method to a new class
 	void addMethod(Class* cls, const string& name, CallBack* handler, int paramCnt, ...);
-	void addMethod(Class* cls, const string& name, CallBack* handler, int paramCnt, va_list args);
 
 	//------------------------------------------
 	// get the type of a value
@@ -60,7 +61,7 @@ public:
 	// (throws exception if value type doesn't match request)
 	bool   boolean(Value* v);
 	double number(Value* v);
-	string str(Value* v);
+	string str(Value* v, bool quoted=false);
 	vector<Value*>& tuple(Value* v);
 	vector<Value*>& list(Value* v);
 

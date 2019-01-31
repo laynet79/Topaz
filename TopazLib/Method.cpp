@@ -1,11 +1,12 @@
 #include "Method.h"
 #include "MethodHandler.h"
+#include "VirtualMachine.h"
 
 //-------------------------------------------------------
 int Method::sNextId = 100;
 //-------------------------------------------------------
 Method::Method(Symbol* c, const string& name, Access access, MethodHandler* handler)
-	: Symbol((Symbol*)c, name, METHOD, nextId(), access), mLocalCnt(0), mHandler(handler)
+	: Symbol(c, name, METHOD, nextId(), access), mLocalCnt(0), mHandler(handler)
 {
 	// create a global string constant using the method name that will
 	// be used a key to lookup methods of this name
@@ -65,6 +66,15 @@ void Method::link()
 void Method::run(VirtualMachine& vm)
 {
 	return mHandler->run(vm);
+}
+//-------------------------------------------------------
+void Method::displayCall(VirtualMachine& vm)
+{
+	vm.out() << parent->name << "." << name << "(";
+	for (int i = 0; i < mParams.size(); i++)
+	{
+
+	}
 }
 //-------------------------------------------------------
 

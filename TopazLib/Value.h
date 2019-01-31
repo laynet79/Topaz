@@ -128,7 +128,7 @@ public:
 	string& value() { return mValue; }
 protected:
 	ValueType getType() override { return STRING; }
-	string getString() override { return mValue; }
+	string getString() override { return "\"" + mValue + "\""; }
 	string mValue;
 };
 //-------------------------------------------------------

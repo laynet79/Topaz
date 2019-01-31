@@ -10,6 +10,7 @@
 //-------------------------------------------------------
 VirtualMachine::VirtualMachine() : mSymbols(mConstants)
 {
+	mOut = &cout;
 	mMath.initialize(*this);
 }
 //-------------------------------------------------------
@@ -65,10 +66,36 @@ Value* VirtualMachine::call(Value* object, const string& cls, const string& name
 	}
 	if (object == nullptr)
 		object = c->nullInstance();
-	newFrame(object, argCnt, 0);
-	m->run(*this);
+	makeCall((Instance*)object, m, name, argCnt, 0);
 	Value* result = pop();
 	return result;
+}
+//-------------------------------------------------------
+void VirtualMachine::makeCall(Instance* object, Method* method, const string& methodName, int paramCnt, int localCnt)
+{
+	newFrame(object, paramCnt, localCnt);
+	try
+	{
+		if (method == nullptr)
+			throw "undefined method";
+		if (paramCnt != method->paramCnt())
+			throw "wrong number of parameters";
+		method->run(*this);
+	}
+	catch (const char* msg)
+	{
+		out() << msg << endl;
+		out() << object->cls()->name << "." << methodName << "(";
+		for (int i = 0; i < paramCnt; i++)
+		{
+			if (i > 0)
+				out() << ",";
+			out() << param(i)->toString();
+		}
+		out() << ")" << endl;
+		Return(nullptr); // pop stack frame
+		throw msg;
+	}
 }
 //-------------------------------------------------------
 Class* VirtualMachine::addClass(const string& name, int varCnt, ...)
@@ -118,10 +145,10 @@ ValueType VirtualMachine::type(Value* v) { return v->type(); }
 
 //-------------------------------------------------------
 Value* VirtualMachine::value(bool b) { return Value::boolean(b); }
-Value* VirtualMachine::value(double n) { return Value::number(n)->ref(); }
-Value* VirtualMachine::value(const string& s) { return Value::str(s)->ref(); }
-Value* VirtualMachine::valueTuple(const vector<Value*>& t) { return Value::tuple(t)->ref(); }
-Value* VirtualMachine::valueList(const vector<Value*>& l) { return Value::list(l)->ref(); }
+Value* VirtualMachine::value(double n) { return Value::number(n); }
+Value* VirtualMachine::value(const string& s) { return Value::str(s); }
+Value* VirtualMachine::valueTuple(const vector<Value*>& t) { return Value::tuple(t); }
+Value* VirtualMachine::valueList(const vector<Value*>& l) { return Value::list(l); }
 
 //-------------------------------------------------------
 bool   VirtualMachine::boolean(Value* v) { return v->boolean(); }
@@ -137,8 +164,9 @@ void VirtualMachine::release(Value* v) { if (v) v->deref(); }
 void VirtualMachine::verifyParamCnt(int n)
 {
 	if (mStack.paramCnt() != n)
-		throw "wrong number of parameters";
+		throw "wrong number of parameters passed to function";
 }
+Value* VirtualMachine::param(int i) { return mStack.param(i); }
 bool VirtualMachine::boolParam(int i) { return mStack.param(i)->boolean(); }
 double VirtualMachine::numberParam(int i) { return mStack.param(i)->number(); }
 string& VirtualMachine::stringParam(int i) { return mStack.param(i)->str(); }

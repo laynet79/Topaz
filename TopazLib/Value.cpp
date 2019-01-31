@@ -30,7 +30,7 @@ int Value::integer()
 		throw "number expected";
 	return (int)((Number*)this)->value();
 }
-string&Value::str()
+string& Value::str()
 {
 	if (this == nullptr || type() != ValueType::STRING)
 		throw "string expected";

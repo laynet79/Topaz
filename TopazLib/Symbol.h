@@ -66,7 +66,7 @@ public:
 		catch (...) {}
 		if (parent && recursive)
 			return parent->lookup(name); // go to next level of scope
-		throw "undefined symbol: " + name;
+		throw ("undefined symbol: " + name).c_str();
 	}
 
 	Value*& value(VirtualMachine& vm);

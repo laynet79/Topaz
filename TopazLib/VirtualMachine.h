@@ -1,9 +1,11 @@
 #pragma once
 #include <vector>
 using namespace std;
+#include <iostream>
 #include <cstdarg>
 
 class Class;
+class Method;
 class Constant;
 #include "CallBack.h"
 #include "Stack.h"
@@ -20,6 +22,11 @@ public:
 	Stack& stack() { return mStack; }
 
 	//------------------------------------------
+	// set the output stream for error messages
+	void setOutputStream(ostream& output) { mOut = &output; }
+	ostream& out() { return *mOut; }
+
+	//------------------------------------------
 	// run a test
 	void runTest();
 
@@ -31,6 +38,7 @@ public:
 	// call a class function
 	Value* call(Value* object, const string& cls, const string& name, int argCnt, ...);
 	Value* call(Value* object, const string& cls, const string& name, int argCnt, va_list args);
+	void makeCall(Instance* object, Method* method, const string& methodName, int paramCnt, int localCnt);
 
 	//------------------------------------------
 	// add a new class to the virtual machine
@@ -72,6 +80,7 @@ public:
 	// runtime stack.
 	// (throws a char* exception)
 	void verifyParamCnt(int n);
+	Value* param(int i);
 	bool boolParam(int i);
 	double numberParam(int i);
 	string& stringParam(int i);
@@ -95,6 +104,7 @@ public:
 	void newFrame(Value* inst, int paramCnt, int localCnt);
 
 private:
+	ostream* mOut;
 	SymbolTable mSymbols;
 	vector<Constant*> mConstants;
 	Stack mStack;

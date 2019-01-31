@@ -31,14 +31,14 @@ protected:
 	bool boolean(VirtualMachine& vm, Symbol* s)				{ return s->value(vm)->boolean();	}
 	double number(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->number();    }
 	int integer(VirtualMachine& vm, Symbol* s)				{ return (int)s->value(vm)->number(); }
-	string& str(VirtualMachine& vm, Symbol* s)				{ return s->value(vm)->str();		}
+	string str(VirtualMachine& vm, Symbol* s)				{ return s->value(vm)->str();		}
 	Instance* inst(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->inst();      }
 	vector<Value*>& tuple(VirtualMachine& vm, Symbol* s)	{ return s->value(vm)->tuple();		}
 	Tuple* tuplePtr(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->tuplePtr();  }
 	vector<Value*>& list(VirtualMachine& vm, Symbol* s)		{ return s->value(vm)->list();      }
 	List* listPtr(VirtualMachine& vm, Symbol* s)			{ return s->value(vm)->listPtr();   }
 
-	void error(const string& msg) { throw string("line ") + to_string(mLine) + " " + msg; }
+	void error(const string& msg) { throw msg.c_str(); }
 };
 //-------------------------------------------------------
 inline
